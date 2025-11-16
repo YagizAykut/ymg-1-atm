@@ -31,7 +31,7 @@ Projeyi docker-compose.yml dosyasını kullanarak başlatmak en kolay yoldur. Bu
 docker-compose up -d
 
 
-Uygulama http://localhost:8080 adresinde yayın yapmaya başlayacaktır.
+Uygulama http://localhost:8080/swagger-ui.html adresinde yayın yapmaya başlayacaktır.
 
 Servisi durdurmak için:
 
