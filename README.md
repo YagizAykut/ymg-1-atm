@@ -38,7 +38,7 @@ Servisi durdurmak için:
 docker-compose down
 
 
-Swagger Dokümantasyonu (Ödev Çıktısı)
+Swagger Dokümantasyonu 
 
 Proje başarıyla çalıştıktan sonra (Tomcat started on port(s): 8080 mesajı görüldüğünde),
 interaktif Swagger dokümantasyonuna erişmek için tarayıcınızdan aşağıdaki adresi açın:
