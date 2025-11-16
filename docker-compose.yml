@@ -1,18 +1,18 @@
 # Docker Compose dosya sürümü
 version: '3.8'
 
-# Servislerimizi tanımlıyoruz (bizde sadece 1 servis var)
+
 services:
 
-  # API servisimizin adı 'atmapi-service' olsun
+  
   atmapi-service:
-    # Mevcut dizindeki (build: .) Dockerfile dosyasını kullanarak bir imaj inşa et
+    
     build: .
-    # Container'a bir isim verelim
+    
     container_name: atm-api
-    # Port yönlendirmesi:
-    # Bilgisayarınızın (Host) 8080 portunu, container'ın 8080 portuna bağla.
+    
+    
     ports:
       - "8080:8080"
-    # Eğer container durursa, Docker onu otomatik olarak yeniden başlatsın
+    
     restart: always
