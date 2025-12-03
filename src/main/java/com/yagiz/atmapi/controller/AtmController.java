@@ -13,6 +13,7 @@ import org.springframework.web.bind.annotation.*;
 @RestController
 @RequestMapping("/api/atm") // Bütün endpoint'ler /api/atm ile başlasın
 @Tag(name = "ATM API Servisi", description = "Para Çekme, Yatırma ve Bakiye İşlemleri")
+@CrossOrigin(origins = "*")
 public class AtmController {
 
     @Autowired
