@@ -1,0 +1,20 @@
+services:
+  # 1. Servis: Backend (Java Spring Boot)
+  atmapi-service:
+    build: .
+    container_name: atm-backend
+    ports:
+      - "8080:8080" # Backend 8080 portunda çalışacak
+    restart: always
+
+  # 2. Servis: Frontend (Nginx Sunucusu)
+  atm-frontend:
+    image: nginx:alpine
+    container_name: atm-frontend
+    ports:
+      - "80:80"     # Frontend 80 (standart web) portunda çalışacak
+    volumes:
+      # 'frontend' klasörümüzü Nginx'in sunacağı klasöre bağlıyoruz
+      - ./frontend:/usr/share/nginx/html
+    depends_on:
+      - atmapi-service # Backend açılmadan Frontend başlamasın

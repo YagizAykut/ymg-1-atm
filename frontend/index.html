@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Güvenli ATM Uygulaması</title>
+    <style>
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #f0f2f5; display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; }
+        .atm-container { background-color: white; padding: 30px; border-radius: 15px; box-shadow: 0 10px 25px rgba(0,0,0,0.1); width: 350px; text-align: center; }
+        h2 { color: #2c3e50; margin-bottom: 20px; }
+        .screen { background-color: #ecf0f1; padding: 15px; border-radius: 10px; margin-bottom: 20px; border: 2px solid #bdc3c7; min-height: 50px; display: flex; align-items: center; justify-content: center; font-weight: bold; color: #2c3e50; font-size: 14px; }
+        input { width: 100%; padding: 12px; margin: 5px 0; border: 1px solid #ddd; border-radius: 5px; box-sizing: border-box; font-size: 16px; }
+        .btn-group { display: flex; gap: 10px; margin-top: 10px; }
+        button { flex: 1; padding: 12px; border: none; border-radius: 5px; cursor: pointer; font-weight: bold; transition: background 0.3s; }
+        .btn-login { background-color: #8e44ad; color: white; width: 100%; margin-bottom: 10px;}
+        .btn-check { background-color: #3498db; color: white; width: 100%; margin-bottom: 10px;}
+        .btn-deposit { background-color: #2ecc71; color: white; }
+        .btn-withdraw { background-color: #e74c3c; color: white; }
+        button:disabled { background-color: #bdc3c7; cursor: not-allowed; }
+        button:hover:not(:disabled) { opacity: 0.9; }
+        .hidden { display: none; }
+    </style>
+</head>
+<body>
+
+<div class="atm-container">
+    <h2>Bankamatik</h2>
+    <div id="output" class="screen">Lütfen Giriş Yapınız...</div>
+    
+    <div id="login-section">
+        <input type="text" id="loginHesapNo" placeholder="Hesap No (11112222)" value="11112222">
+        <input type="password" id="loginPin" placeholder="PIN (1234)" value="1234">
+        <button class="btn-login" onclick="girisYap()">Giriş Yap (Token Al)</button>
+    </div>
+
+    <div id="operation-section" class="hidden">
+        <input type="text" id="hesapNo" readonly value="11112222" style="background-color: #eee;">
+        <input type="number" id="miktar" placeholder="Miktar (TL)">
+
+        <button class="btn-check" onclick="bakiyeSorgula()">Bakiye Sorgula</button>
+        
+        <div class="btn-group">
+            <button class="btn-deposit" onclick="islemYap('para-yatir')">Para Yatır</button>
+            <button class="btn-withdraw" onclick="islemYap('para-cek')">Para Çek</button>
+        </div>
+        <button onclick="cikisYap()" style="margin-top:10px; background-color:#7f8c8d; color:white; width:100%">Çıkış</button>
+    </div>
+</div>
+
+<script>
+    const API_URL = "http://localhost:8080/api/atm";
+    let activeToken = null; 
+
+    
+    async function girisYap() {
+        const hesapNo = document.getElementById('loginHesapNo').value;
+        const pin = document.getElementById('loginPin').value;
+
+        try {
+            const response = await fetch(`${API_URL}/login`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ hesapNo, pin })
+            });
+            
+            const data = await response.json();
+
+            if (response.ok) {
+                activeToken = data.token; 
+                document.getElementById('hesapNo').value = hesapNo;
+                
+                
+                document.getElementById('login-section').classList.add('hidden');
+                document.getElementById('operation-section').classList.remove('hidden');
+                goster("Giriş Başarılı!<br>İşlem yapabilirsiniz.");
+            } else {
+                goster("Hata: " + (data.message || "Giriş başarısız!"));
+            }
+        } catch (error) {
+            goster("Sunucuya bağlanılamadı!");
+        }
+    }
+
+    async function bakiyeSorgula() {
+        if (!activeToken) return goster("Önce giriş yapmalısınız!");
+
+        const hesapNo = document.getElementById('hesapNo').value;
+        try {
+            const response = await fetch(`${API_URL}/bakiye/${hesapNo}`, {
+                method: 'GET',
+                headers: { 
+                    'Authorization': `Bearer ${activeToken}` 
+                }
+            });
+            const data = await response.json();
+            
+            if(response.ok) {
+                goster(`Hesap: ${data.hesapNo} <br> Bakiye: ${data.guncelBakiye} TL`);
+            } else {
+                goster("Hata: " + (data.error || "Yetkisiz Erişim"));
+                if(response.status === 401) cikisYap();
+            }
+        } catch (error) {
+            goster("Bağlantı Hatası!");
+        }
+    }
+
+    async function islemYap(tip) {
+        if (!activeToken) return goster("Önce giriş yapmalısınız!");
+
+        const hesapNo = document.getElementById('hesapNo').value;
+        const miktar = document.getElementById('miktar').value;
+        const pin = document.getElementById('loginPin').value;
+
+        const payload = tip === 'para-cek' 
+            ? { hesapNo, miktar: parseFloat(miktar), pin: pin }
+            : { hesapNo, miktar: parseFloat(miktar) };
+
+        try {
+            const response = await fetch(`${API_URL}/${tip}`, {
+                method: 'POST',
+                headers: { 
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${activeToken}` 
+                },
+                body: JSON.stringify(payload)
+            });
+            const data = await response.json();
+            
+            if(response.ok) {
+                goster(`İşlem Başarılı! <br> Yeni Bakiye: ${data.guncelBakiye} TL`);
+            } else {
+                goster("Hata: " + (data.message || data.error));
+            }
+        } catch (error) {
+            goster("İşlem sırasında hata oluştu!");
+        }
+    }
+
+    function cikisYap() {
+        activeToken = null;
+        document.getElementById('login-section').classList.remove('hidden');
+        document.getElementById('operation-section').classList.add('hidden');
+        document.getElementById('loginPin').value = "";
+        goster("Çıkış yapıldı.");
+    }
+
+    function goster(mesaj) {
+        document.getElementById('output').innerHTML = mesaj;
+    }
+</script>
+
+</body>
+</html>
