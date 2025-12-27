@@ -1,7 +1,7 @@
 version: '3.8'
 
 services:
-  # 1. Servis: Backend
+  
   atmapi-service:
     build: .
     container_name: atm-backend
@@ -16,7 +16,7 @@ services:
       - postgres-db
     restart: always
 
-  # 2. Servis: Frontend
+  
   atm-frontend:
     image: nginx:alpine
     container_name: atm-frontend
@@ -27,7 +27,7 @@ services:
     depends_on:
       - atmapi-service
 
-  # 3. Servis: Veritabanı (YENİ)
+  
   postgres-db:
     image: postgres:15
     container_name: atm-postgres-db
@@ -36,7 +36,7 @@ services:
       - POSTGRES_USER=postgres
       - POSTGRES_PASSWORD=1234
     ports:
-      - "5433:5432" # Dışarıya 5433 olarak veriyoruz (Çakışma olmasın diye)
+      - "5433:5432" 
     volumes:
       - postgres_data:/var/lib/postgresql/data
 

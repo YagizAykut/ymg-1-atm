@@ -1,6 +1,6 @@
 package com.yagiz.atmapi.model;
 
-import jakarta.persistence.*; // Bu import önemli
+import jakarta.persistence.*; 
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -8,13 +8,13 @@ import lombok.NoArgsConstructor;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-@Entity // Veritabanı tablosu olduğunu belirtir
-@Table(name = "hesaplar") // Tablo adı 'hesaplar' olsun
+@Entity 
+@Table(name = "hesaplar") 
 public class Hesap {
 
     @Id
     @Column(name = "hesap_no")
-    private String hesapNo; // TC/Hesap No ID olarak kullanıyoruz
+    private String hesapNo; 
 
     private String pin;
     
