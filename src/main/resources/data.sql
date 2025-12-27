@@ -1,0 +1,2 @@
+INSERT INTO hesaplar (hesap_no, pin, bakiye) VALUES ('11112222', '1234', 1500.75) ON CONFLICT DO NOTHING;
+INSERT INTO hesaplar (hesap_no, pin, bakiye) VALUES ('99998888', '9876', 450.00) ON CONFLICT DO NOTHING;

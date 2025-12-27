@@ -1,20 +1,44 @@
+version: '3.8'
+
 services:
-  # 1. Servis: Backend (Java Spring Boot)
+  # 1. Servis: Backend
   atmapi-service:
     build: .
     container_name: atm-backend
     ports:
-      - "8080:8080" # Backend 8080 portunda çalışacak
+      - "8080:8080"
+    environment:
+      - SPRING_DATASOURCE_URL=jdbc:postgresql://postgres-db:5432/atm_db
+      - SPRING_DATASOURCE_USERNAME=postgres
+      - SPRING_DATASOURCE_PASSWORD=1234
+      - SPRING_JPA_HIBERNATE_DDL_AUTO=update
+    depends_on:
+      - postgres-db
     restart: always
 
-  # 2. Servis: Frontend (Nginx Sunucusu)
+  # 2. Servis: Frontend
   atm-frontend:
     image: nginx:alpine
     container_name: atm-frontend
     ports:
-      - "80:80"     # Frontend 80 (standart web) portunda çalışacak
+      - "80:80"
     volumes:
-      # 'frontend' klasörümüzü Nginx'in sunacağı klasöre bağlıyoruz
       - ./frontend:/usr/share/nginx/html
     depends_on:
-      - atmapi-service # Backend açılmadan Frontend başlamasın
+      - atmapi-service
+
+  # 3. Servis: Veritabanı (YENİ)
+  postgres-db:
+    image: postgres:15
+    container_name: atm-postgres-db
+    environment:
+      - POSTGRES_DB=atm_db
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=1234
+    ports:
+      - "5433:5432" # Dışarıya 5433 olarak veriyoruz (Çakışma olmasın diye)
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+volumes:
+  postgres_data:
